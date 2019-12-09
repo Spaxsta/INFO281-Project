@@ -1,16 +1,22 @@
 library(shiny)
 library(leaflet)
+library(ggplot2)
 library(RColorBrewer)
 library(tidyverse)
 
 SchoolData <- read.csv("LocationData.csv")
+DecileUE <- read.csv("Decile UE Gained.xlsx")
+
+dat <- data.frame(decile=c("1-3", "4-7", "8-10"),
+                  passRate=c(20, 50, 80))
 
 r_colors <- rgb(t(col2rgb(colors()) / 255))
 names(r_colors) <- colors()
 
 ui <- fluidPage(
     leafletOutput("mymap"),
-    p()
+    p(),
+    plotOutput("barplot")
 )
 
 server <- function(input, output, session) {
@@ -45,6 +51,15 @@ server <- function(input, output, session) {
                                                                                                                                                 
         #, label =  ~Decile, 
         #labelOptions = labelOptions(noHide = T, direction = 'Top', textOnly = T) This is too slow currently need to figure out why
+    })
+    
+    output$barplot <-renderPlot({
+        ggplot(data = dat, aes(y=passRate, x=decile, fill=decile))+
+            geom_bar(stat="identity", width=0.7)+
+            ggtitle("University Enterace achieved by school decile")+
+            labs(x = NULL, y = "Pass Rate")+
+            theme_classic()+
+            theme(plot.title = element_text(color="black", size=20, face="bold", hjust = 0.5))
     })
 }
 
