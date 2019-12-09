@@ -3,13 +3,7 @@ library(leaflet)
 library(RColorBrewer)
 library(tidyverse)
 
-wvs <- read.csv("LocationData.csv")
-
-Lat <- wvs$Latitude
-
-Lon <- wvs$Longitude
-
-schoolNames <- wvs$Org.Name
+SchoolData <- read.csv("LocationData.csv")
 
 r_colors <- rgb(t(col2rgb(colors()) / 255))
 names(r_colors) <- colors()
@@ -31,8 +25,26 @@ server <- function(input, output, session) {
             addProviderTiles(providers$Stamen.TonerLite,
                              options = providerTileOptions(noWrap = TRUE)
             ) %>%
-            addCircleMarkers(data = wvs, lng = ~Lon, lat = ~Lat, popup = ~schoolNames, stroke = FALSE, fillOpacity = 0.5, label =  ~schoolNames, 
-                             labelOptions = labelOptions(noHide = T, direction = 'top', textOnly = T))
+            addCircleMarkers(data = SchoolData, 
+                             lng = SchoolData$Longitude, 
+                             lat = SchoolData$Latitude, 
+                             stroke = FALSE, 
+                             fillOpacity = 0.5,        
+                             popup = paste(SchoolData$schoolName, "<b>",SchoolData$Org.Name,"</b>", "<br>",
+                                                           "Decile Rating: ", SchoolData$Decile, "<br>",
+                                                           "CoEd Status: ", SchoolData$CoEd.Status, "<br>",
+                                                           "School Type: ", SchoolData$Org.Type, "<br>",
+                                                           "Enrolment Number: ", SchoolData$Total, "<br>",
+                                                           "Number of European Pupils: ", SchoolData$European, "<br>",
+                                                           "Number of Māori Pupils: ", SchoolData$Maori, "<br>",
+                                                           "Number of Pacific Pupils: ", SchoolData$Pacific, "<br>",
+                                                           "Number of Asian Pupils: ", SchoolData$Asian, "<br>",
+                                                           "Number of MELAA Pupils: ", SchoolData$MELAA, "<br>",
+                                                           "Number of Other Pupils: ", SchoolData$Other, "<br>",
+                                                           "Number of International Pupils: ", SchoolData$International, "<br>"))
+                                                                                                                                                
+        #, label =  ~Decile, 
+        #labelOptions = labelOptions(noHide = T, direction = 'Top', textOnly = T) This is too slow currently need to figure out why
     })
 }
 
