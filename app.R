@@ -13,6 +13,8 @@ dat <- data.frame(decile=c("1-3", "4-7", "8-10"),
 r_colors <- rgb(t(col2rgb(colors()) / 255))
 names(r_colors) <- colors()
 
+mapColours <- c(rgb(1,0,0), rgb(1,0,0), rgb(1,0,0), rgb(1,0,0),rgb(0,1,0),rgb(0,1,0),rgb(0,1,0),rgb(0,1,0),rgb(0,0,1),rgb(0,0,1),rgb(0,0,1))
+
 ui <- fluidPage(
     leafletOutput("mymap"),
     p(),
@@ -35,7 +37,10 @@ server <- function(input, output, session) {
                              lng = SchoolData$Longitude, 
                              lat = SchoolData$Latitude, 
                              stroke = FALSE, 
-                             fillOpacity = 0.5,        
+                             fillOpacity = 0.5,     
+                             color = mapColours[SchoolData$Decile],
+                             label =  SchoolData$Decile, 
+                             labelOptions = labelOptions(direction = 'Top', textOnly = TRUE),
                              popup = paste(SchoolData$schoolName, "<b>",SchoolData$Org.Name,"</b>", "<br>",
                                                            "Decile Rating: ", SchoolData$Decile, "<br>",
                                                            "CoEd Status: ", SchoolData$CoEd.Status, "<br>",
