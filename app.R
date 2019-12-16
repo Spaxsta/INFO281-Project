@@ -6,11 +6,17 @@ library(tidyverse)
 
 SchoolData <- read.csv("LocationData.csv")
 DecileUE <- read.csv("Decile_UE_Gained.csv")
+EthnicityUE <- read.csv("Ethnicity_UE_Gained.csv")
 
-currentYear <- as.numeric(sub("%", "",DecileUE$Current.Year.Attainment.Rate,fixed=TRUE))
 
-dat <- data.frame(decile=c("1-3", "4-7", "8-10"),
-                  passRate=currentYear)
+currentYearEthnicity <- as.numeric(sub("%", "",EthnicityUE$Current.Year.Attainment.Rate,fixed=TRUE))
+currentYearDecile <- as.numeric(sub("%", "",DecileUE$Current.Year.Attainment.Rate,fixed=TRUE))
+
+Ethnicitdat <- data.frame(ethnicity=c("Maori", "European", "Pacifica", "Asian", "Middel Eastern"),
+                        passRate=currentYearEthnicity)
+
+Deciledat <- data.frame(decile=c("1-3", "4-7", "8-10"),
+                  passRate=currentYearDecile)
 
 r_colors <- rgb(t(col2rgb(colors()) / 255))
 names(r_colors) <- colors()
@@ -20,7 +26,9 @@ mapColours <- c(rgb(1,0,0), rgb(1,0,0), rgb(1,0,0),rgb(0,1,0),rgb(0,1,0),rgb(0,1
 ui <- fluidPage(
     leafletOutput("mymap"),
     p(),
-    plotOutput("barplot")
+    plotOutput("barplot"),
+    p(),
+    plotOutput("barplot2")
 )
 
 server <- function(input, output, session) {
@@ -61,7 +69,17 @@ server <- function(input, output, session) {
     })
     
     output$barplot <-renderPlot({
-        ggplot(data = dat, aes(y=passRate, x=decile, fill=decile))+
+        ggplot(data = Ethnicitdat, aes(y=passRate, x=ethnicity, fill=ethnicity))+
+            geom_bar(stat="identity", width=0.7)+
+            geom_text(aes(label=passRate), vjust=5) +
+            ggtitle("University Entrance achieved by school ethnicity")+
+            labs(x = NULL, y = "Pass Rate")+
+            theme_classic()+
+            theme(plot.title = element_text(color="black", size=20, face="bold", hjust = 0.5))
+    })
+    
+    output$barplot2 <-renderPlot({
+        ggplot(data = Deciledat, aes(y=passRate, x=decile, fill=decile))+
             geom_bar(stat="identity", width=0.7)+
             geom_text(aes(label=passRate), vjust=5) +
             ggtitle("University Entrance achieved by school decile")+
