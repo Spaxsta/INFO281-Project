@@ -12,23 +12,31 @@ EthnicityUE <- read.csv("Ethnicity_UE_Gained.csv")
 currentYearEthnicity <- as.numeric(sub("%", "",EthnicityUE$Current.Year.Attainment.Rate,fixed=TRUE))
 currentYearDecile <- as.numeric(sub("%", "",DecileUE$Current.Year.Attainment.Rate,fixed=TRUE))
 
-Ethnicitdat <- data.frame(ethnicity=c("Maori", "European", "Pacifica", "Asian", "Middel Eastern"),
+Ethnicitdat <- data.frame(ethnicity=c("Maori", "European", "Pacifica", "Asian", "Middle Eastern"),
                         passRate=currentYearEthnicity)
 
 Deciledat <- data.frame(decile=c("1-3", "4-7", "8-10"),
                   passRate=currentYearDecile)
 
+deciles = c("1-3", "4-7", "8-10")
+
 r_colors <- rgb(t(col2rgb(colors()) / 255))
+
 names(r_colors) <- colors()
 
 mapColours <- c(rgb(1,0,0), rgb(1,0,0), rgb(1,0,0),rgb(0,1,0),rgb(0,1,0),rgb(0,1,0),rgb(0,1,0),rgb(0,0,1),rgb(0,0,1),rgb(0,0,1))
 
 ui <- fluidPage(
-    leafletOutput("mymap"),
-    p(),
-    plotOutput("barplot"),
-    p(),
-    plotOutput("barplot2")
+    column(6,
+           leafletOutput("mymap", width = 400, height = 500)
+             
+    ),
+    column(6,
+           plotOutput("barplot"),
+           p(),
+           plotOutput("barplot2")
+    )
+
 )
 
 server <- function(input, output, session) {
@@ -71,8 +79,8 @@ server <- function(input, output, session) {
     output$barplot <-renderPlot({
         ggplot(data = Ethnicitdat, aes(y=passRate, x=ethnicity, fill=ethnicity))+
             geom_bar(stat="identity", width=0.7)+
-            geom_text(aes(label=passRate), vjust=5) +
-            ggtitle("University Entrance achieved by school ethnicity")+
+            geom_text(aes(label=paste(passRate, "%", sep = "")), vjust=5) +
+            ggtitle("UE achieved by school ethnicity")+
             labs(x = NULL, y = "Pass Rate")+
             theme_classic()+
             theme(plot.title = element_text(color="black", size=20, face="bold", hjust = 0.5))
@@ -81,8 +89,8 @@ server <- function(input, output, session) {
     output$barplot2 <-renderPlot({
         ggplot(data = Deciledat, aes(y=passRate, x=decile, fill=decile))+
             geom_bar(stat="identity", width=0.7)+
-            geom_text(aes(label=passRate), vjust=5) +
-            ggtitle("University Entrance achieved by school decile")+
+            geom_text(aes(label=paste(passRate, "%", sep = "")), vjust=5) +
+            ggtitle("UE achieved by school decile")+
             labs(x = NULL, y = "Pass Rate")+
             theme_classic()+
             theme(plot.title = element_text(color="black", size=20, face="bold", hjust = 0.5))
