@@ -7,16 +7,24 @@ library(tidyverse)
 SchoolData <- read.csv("LocationData.csv")
 DecileUE <- read.csv("Decile_UE_Gained.csv")
 EthnicityUE <- read.csv("Ethnicity_UE_Gained.csv")
+Level1Ethnicity <- read.csv("Level1_Ethnicity.csv")
+Level2_Ethnicity <- read.csv("Level2_Ethnicity.csv")
+Level3_Ethnicity <- read.csv("Level3_Ethnicity.csv")
 
 
-currentYearEthnicity <- as.numeric(sub("%", "",EthnicityUE$Current.Year.Attainment.Rate,fixed=TRUE))
-currentYearDecile <- as.numeric(sub("%", "",DecileUE$Current.Year.Attainment.Rate,fixed=TRUE))
+currentYearEthnicityUE <- as.numeric(sub("%", "",EthnicityUE$Current.Year.Attainment.Rate,fixed=TRUE))
+currentYearEthnicityL1 <- as.numeric(sub("%", "",Level1Ethnicity$Current.Year.Attainment.Rate,fixed=TRUE))
+currentYearEthnicityL2 <- as.numeric(sub("%", "",Level2_Ethnicity$Current.Year.Attainment.Rate,fixed=TRUE))
+currentYearEthnicityL3 <- as.numeric(sub("%", "",Level3_Ethnicity$Current.Year.Attainment.Rate,fixed=TRUE))
 
-Ethnicitdat <- data.frame(ethnicity=c("Maori", "European", "Pacifica", "Asian", "Middle Eastern"),
-                        passRate=currentYearEthnicity)
+currentYearDecileUE <- as.numeric(sub("%", "",DecileUE$Current.Year.Attainment.Rate,fixed=TRUE))
+
+Ethnicitydat <- data.frame(ethnicity=c("Maori", "European", "Pacifica", "Asian", "Middle Eastern"),
+                           University_Enterance=currentYearEthnicityUE, NCEA_Level_1=currentYearEthnicityL1,
+                           NCEA_Level_2=currentYearEthnicityL2, NCEA_Level_3=currentYearEthnicityL3)
 
 Deciledat <- data.frame(decile=c("1-3", "4-7", "8-10"),
-                  passRate=currentYearDecile)
+                  passRate=currentYearDecileUE)
 
 deciles = c("1-3", "4-7", "8-10")
 
@@ -32,6 +40,10 @@ ui <- fluidPage(
              
     ),
     column(6,
+           selectInput(inputId = 'Ethnicity',
+                       label='Select ethnicity NCEA level pass rate:',
+                       choices=c('University_Enterance','NCEA_Level_1','NCEA_Level_2','NCEA_Level_3'),
+                       selected='passRateUE'),
            plotOutput("barplot"),
            p(),
            plotOutput("barplot2")
@@ -77,11 +89,12 @@ server <- function(input, output, session) {
     })
     
     output$barplot <-renderPlot({
-        ggplot(data = Ethnicitdat, aes(y=passRate, x=ethnicity, fill=ethnicity))+
+        ggplot(data = Ethnicitydat, aes_string(y=input$Ethnicity, x=Ethnicitydat$ethnicity, fill=Ethnicitydat$ethnicity))+
             geom_bar(stat="identity", width=0.7)+
-            geom_text(aes(label=paste(passRate, "%", sep = "")), vjust=5) +
-            ggtitle("UE achieved by school ethnicity")+
+            geom_text(aes(label=paste(Ethnicitydat$input$Ethnicity, "%", sep = "")), vjust=5) +
+            ggtitle(paste(input$Ethnicity, "achieved \nby school ethnicity 2018"))+
             labs(x = NULL, y = "Pass Rate")+
+            ylim(0,100)+
             theme_classic()+
             theme(plot.title = element_text(color="black", size=20, face="bold", hjust = 0.5))
     })
@@ -90,7 +103,7 @@ server <- function(input, output, session) {
         ggplot(data = Deciledat, aes(y=passRate, x=decile, fill=decile))+
             geom_bar(stat="identity", width=0.7)+
             geom_text(aes(label=paste(passRate, "%", sep = "")), vjust=5) +
-            ggtitle("UE achieved by school decile")+
+            ggtitle("UE achieved by school decile 2018")+
             labs(x = NULL, y = "Pass Rate")+
             theme_classic()+
             theme(plot.title = element_text(color="black", size=20, face="bold", hjust = 0.5))
