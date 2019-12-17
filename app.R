@@ -4,12 +4,17 @@ library(ggplot2)
 library(RColorBrewer)
 library(tidyverse)
 
-SchoolData <- read.csv("LocationData.csv")
-DecileUE <- read.csv("Decile_UE_Gained.csv")
-EthnicityUE <- read.csv("Ethnicity_UE_Gained.csv")
-Level1Ethnicity <- read.csv("Level1_Ethnicity.csv")
-Level2_Ethnicity <- read.csv("Level2_Ethnicity.csv")
-Level3_Ethnicity <- read.csv("Level3_Ethnicity.csv")
+SchoolData <- read.csv("data/LocationData.csv")
+
+DecileUE <- read.csv("data/Decile_UE_Gained.csv")
+Level1_Decile <- read.csv("data/Level1_Decile.csv")
+Level2_Decile <- read.csv("data/Level2_Decile.csv")
+Level3_Decile <- read.csv("data/Level3_Decile.csv")
+
+EthnicityUE <- read.csv("data/Ethnicity_UE_Gained.csv")
+Level1Ethnicity <- read.csv("data/Level1_Ethnicity.csv")
+Level2_Ethnicity <- read.csv("data/Level2_Ethnicity.csv")
+Level3_Ethnicity <- read.csv("data/Level3_Ethnicity.csv")
 
 
 currentYearEthnicityUE <- as.numeric(sub("%", "",EthnicityUE$Current.Year.Attainment.Rate,fixed=TRUE))
@@ -18,13 +23,17 @@ currentYearEthnicityL2 <- as.numeric(sub("%", "",Level2_Ethnicity$Current.Year.A
 currentYearEthnicityL3 <- as.numeric(sub("%", "",Level3_Ethnicity$Current.Year.Attainment.Rate,fixed=TRUE))
 
 currentYearDecileUE <- as.numeric(sub("%", "",DecileUE$Current.Year.Attainment.Rate,fixed=TRUE))
+currentYearDecileL1 <- as.numeric(sub("%", "",Level1_Decile$Current.Year.Attainment.Rate,fixed=TRUE))
+currentYearDecileL2 <- as.numeric(sub("%", "",Level2_Decile$Current.Year.Attainment.Rate,fixed=TRUE))
+currentYearDecileL3 <- as.numeric(sub("%", "",Level3_Decile$Current.Year.Attainment.Rate,fixed=TRUE))
 
 Ethnicitydat <- data.frame(ethnicity=c("Maori", "European", "Pacifica", "Asian", "Middle Eastern"),
                            University_Enterance=currentYearEthnicityUE, NCEA_Level_1=currentYearEthnicityL1,
                            NCEA_Level_2=currentYearEthnicityL2, NCEA_Level_3=currentYearEthnicityL3)
 
 Deciledat <- data.frame(decile=c("1-3", "4-7", "8-10"),
-                  passRate=currentYearDecileUE)
+                        University_Enterance=currentYearDecileUE, NCEA_Level_1=currentYearDecileL1,
+                        NCEA_Level_2=currentYearDecileL2, NCEA_Level_3=currentYearDecileL3)
 
 deciles = c("1-3", "4-7", "8-10")
 
@@ -43,9 +52,13 @@ ui <- fluidPage(
            selectInput(inputId = 'Ethnicity',
                        label='Select ethnicity NCEA level pass rate:',
                        choices=c('University_Enterance','NCEA_Level_1','NCEA_Level_2','NCEA_Level_3'),
-                       selected='passRateUE'),
+                       selected='University_Enterance'),
            plotOutput("barplot"),
            p(),
+           selectInput(inputId = 'Decile',
+                       label='Select decile NCEA level pass rate:',
+                       choices=c('University_Enterance','NCEA_Level_1','NCEA_Level_2','NCEA_Level_3'),
+                       selected='University_Enterance'),
            plotOutput("barplot2")
     )
 
@@ -92,6 +105,7 @@ server <- function(input, output, session) {
         ggplot(data = Ethnicitydat, aes_string(y=input$Ethnicity, x=Ethnicitydat$ethnicity, fill=Ethnicitydat$ethnicity))+
             geom_bar(stat="identity", width=0.7)+
             geom_text(aes(label=paste(Ethnicitydat$input$Ethnicity, "%", sep = "")), vjust=5) +
+            labs(fill='Ethnicity')+
             ggtitle(paste(input$Ethnicity, "achieved \nby school ethnicity 2018"))+
             labs(x = NULL, y = "Pass Rate")+
             ylim(0,100)+
@@ -100,11 +114,13 @@ server <- function(input, output, session) {
     })
     
     output$barplot2 <-renderPlot({
-        ggplot(data = Deciledat, aes(y=passRate, x=decile, fill=decile))+
+        ggplot(data = Deciledat, aes_string(y=input$Decile, x=Deciledat$decile, fill=Deciledat$decile))+
             geom_bar(stat="identity", width=0.7)+
-            geom_text(aes(label=paste(passRate, "%", sep = "")), vjust=5) +
-            ggtitle("UE achieved by school decile 2018")+
+            geom_text(aes(label=paste( "%", sep = "")), vjust=5) +
+            labs(fill='Decile')+
+            ggtitle(paste(input$Decile, "achieved \nby school decile 2018"))+
             labs(x = NULL, y = "Pass Rate")+
+            ylim(0,100)+
             theme_classic()+
             theme(plot.title = element_text(color="black", size=20, face="bold", hjust = 0.5))
     })
