@@ -104,7 +104,7 @@ server <- function(input, output, session) {
     output$barplot <-renderPlot({
         ggplot(data = Ethnicitydat, aes_string(y=input$Ethnicity, x=Ethnicitydat$ethnicity, fill=Ethnicitydat$ethnicity))+
             geom_bar(stat="identity", width=0.7)+
-            geom_text(aes(label=paste(Ethnicitydat$input$Ethnicity, "%", sep = "")), vjust=5) +
+            geom_text(aes_string(label=input$Ethnicity), vjust=5) +
             labs(fill='Ethnicity')+
             ggtitle(paste(input$Ethnicity, "achieved \nby school ethnicity 2018"))+
             labs(x = NULL, y = "Pass Rate")+
@@ -116,7 +116,7 @@ server <- function(input, output, session) {
     output$barplot2 <-renderPlot({
         ggplot(data = Deciledat, aes_string(y=input$Decile, x=Deciledat$decile, fill=Deciledat$decile))+
             geom_bar(stat="identity", width=0.7)+
-            geom_text(aes(label=paste( "%", sep = "")), vjust=5) +
+            geom_text(aes_string(label=input$Decile), vjust=5) +
             labs(fill='Decile')+
             ggtitle(paste(input$Decile, "achieved \nby school decile 2018"))+
             labs(x = NULL, y = "Pass Rate")+
